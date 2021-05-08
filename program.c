@@ -1,9 +1,12 @@
 #include <windows.h>
 #include <stdio.h>
 
+#define MAX_CHECKS 60
+
 int main(void)
 {
 	//start the FH4 executable form current directory, exit if the executable not in directory
+
 	puts("Starting ForzaHorizon4_Or.exe");
 	if(system("start ForzaHorizon4_Or.exe"))
 	{
@@ -11,24 +14,23 @@ int main(void)
 	}
 
 	puts("Waiting for alert to show.\n");
-	HWND db;
-	do{
-		//if the gme opens w/o alert, exit yay
-		if(FindWindowA(0, "Forza Horizon 4"))
-		{
-			printf("alert didn't come! \\o/\n");
-			return 0;
-		}
 
+	HWND db = 0;
+
+	for (int i = 0; !db && i < MAX_CHECKS; ++i)
+	{
 		db = FindWindowA(0, "Your system falls below minimum settings.");
 		// printf("got %llx\n", db);
 		Sleep(2000);
-	}while(!db);
+	}
 
 	//printf("%llx\n", db);
 
 	//close the alert box allowing game to load
-	SendMessage(db, WM_CLOSE, 0, 0);
+	if(db)
+		SendMessage(db, WM_CLOSE, 0, 0);
+	else
+		puts("Timed out");
 
 	return 0;
 }
